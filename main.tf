@@ -25,10 +25,6 @@ provider "ibm" {
   ibmcloud_timeout = 300
 }
 
-output "ssh_key_private" {
-  value = var.private_ssh_key
-} 
-
 ##############################################################################
 # Read/validate Resource Group
 ##############################################################################
@@ -44,9 +40,9 @@ resource "ibm_is_security_group" "ubuntu_vsi_sg" {
 
 //security group rule to allow ssh
 resource "ibm_is_security_group_rule" "ubuntu_sg_allow_ssh" {
-  group      = ibm_is_security_group.ubuntu_vsi_sg.id
-  direction  = "inbound"
-  remote     = "0.0.0.0/0"
+  group     = ibm_is_security_group.ubuntu_vsi_sg.id
+  direction = "inbound"
+  remote    = "0.0.0.0/0"
   tcp {
     port_min = 22
     port_max = 22
@@ -54,16 +50,16 @@ resource "ibm_is_security_group_rule" "ubuntu_sg_allow_ssh" {
 }
 
 resource "ibm_is_security_group_rule" "ubuntu_sg_rule_tcp" {
-    depends_on = [ibm_is_security_group_rule.ubuntu_sg_allow_ssh]
-    group      = ibm_is_security_group.ubuntu_vsi_sg.id
-    direction = "inbound"
-    remote = var.f5_mgmt_ipv4_cidr_block
-    // remote = "0.0.0.0/0"
-    tcp  {
-        port_min = 3000
-        port_max = 3000
-    }
- }
+  depends_on = [ibm_is_security_group_rule.ubuntu_sg_allow_ssh]
+  group      = ibm_is_security_group.ubuntu_vsi_sg.id
+  direction  = "inbound"
+  remote     = var.f5_mgmt_ipv4_cidr_block
+  // remote = "0.0.0.0/0"
+  tcp {
+    port_min = 3000
+    port_max = 3000
+  }
+}
 
 resource "ibm_is_security_group_rule" "ubuntu_sg_rule_out_icmp" {
   depends_on = [ibm_is_security_group_rule.ubuntu_sg_rule_tcp]
@@ -85,7 +81,7 @@ resource "ibm_is_security_group_rule" "ubuntu_sg_rule_all_out" {
 
 //source vsi
 resource "ibm_is_instance" "ubuntu_vsi" {
-  depends_on = [ibm_is_security_group_rule.ubuntu_sg_rule_all_out]
+  depends_on     = [ibm_is_security_group_rule.ubuntu_sg_rule_all_out]
   name           = "ubuntu-ha-vsi"
   image          = data.ibm_is_image.custom_image.id
   profile        = "bx2-2x8"
@@ -108,47 +104,55 @@ resource "ibm_is_floating_ip" "ubuntu_vsi_fip" {
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
-# Provision the server using remote-exec
+# Provision the server using ansible-provisioner
 # ---------------------------------------------------------------------------------------------------------------------
 
-resource "null_resource" "ubuntu_provisioner" {
+resource "null_resource" "ubuntu_ansible_provisioner" {
+  depends_on = [ibm_is_floating_ip.ubuntu_vsi_fip]
+
   triggers = {
     public_ip = ibm_is_floating_ip.ubuntu_vsi_fip.address
   }
 
   connection {
-    type  = "ssh"
-    host  = ibm_is_floating_ip.ubuntu_vsi_fip.address
-    user  = "root"
-    port  = 22
-    agent = false
+    host = ibm_is_floating_ip.ubuntu_vsi_fip.address
+    user = "root"  
     private_key = var.private_ssh_key
   }
 
-  // copy our example script to the server
-  provisioner "file" {
-    source      = "script/install.sh"
-    destination = "/root/install.sh"
-  }
-  
-  // copy our example script to the server
+   // copy our example script to the server
   provisioner "file" {
     source      = "script/update_script.sh"
-    destination = "/root/update_script.sh"
+    destination = "/tmp/update_script.sh"
   }
 
-  // change permissions to executable and pipe its output into a new file
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /root/install.sh",
-      "bash /root/install.sh ${var.apikey} ${var.vpc_id} ${var.rias_api_url} ${var.zone} ${var.mgmt_ip1} ${var.ext_ip1} ${var.mgmt_ip2} ${var.ext_ip2} ${ibm_is_instance.ubuntu_vsi.primary_network_interface[0].primary_ipv4_address} ${var.ha_password1} ${var.ha_password2}  > /root/install.log",
-    ]
+  provisioner "ansible" {
+    plays {
+      playbook {
+        file_path = "script/install.yaml"
+      }
+      verbose = true
+       extra_vars = {
+        vpcid = var.vpc_id
+        vpcurl = var.rias_api_url
+        zone = var.zone
+        apikey = var.apikey
+        mgmtip1 = var.mgmt_ip1
+        extip1 = var.ext_ip1
+        mgmtip2 = var.mgmt_ip2
+        extip2 = var.ext_ip2
+        ipaddress = ibm_is_instance.ubuntu_vsi.primary_network_interface[0].primary_ipv4_address 
+        ha1pwd = var.ha_password1
+        ha2pwd = var.ha_password2
+      }
+    }
+
+    ansible_ssh_settings {
+      insecure_no_strict_host_key_checking = true
+      connect_timeout_seconds              = 60
+    }
+
   }
-  
-  /*
-    provisioner "local-exec" {
-    # copy the log file back to CWD, which will be tested
-    command = "scp -o StrictHostKeyChecking=no root@${ibm_is_floating_ip.ubuntu_vsi_fip.address}:/root/install.log ."
-  }
-    */
 }
+
+

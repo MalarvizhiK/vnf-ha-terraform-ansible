@@ -87,3 +87,8 @@ variable "ha_password2" {
   default     = ""
   description = "HA instance2 Password."
 }
+
+variable "private_ssh_key" {
+  default     = ""
+  description = "SSH private key."
+}
