@@ -25,9 +25,6 @@
     - debug:
         msg: "Removed lock files ..."
 
-    - pause:
-        seconds: 30
-
     - name: Run apt-get update
       apt:
         update_cache: yes
