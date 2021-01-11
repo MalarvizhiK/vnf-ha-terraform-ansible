@@ -29,6 +29,19 @@
       apt:
         update_cache: yes
 
+    - name: Remove lock files
+      file:
+        path: ?~@~\{{ item }}?~@~]
+        state: absent
+      with_items:
+        - /var/lib/apt/lists/lock
+        - /var/cache/apt/archives/lock
+        - /var/lib/dpkg/lock
+        - /var/lib/dpkg/lock-frontend
+
+    - debug:
+        msg: "Removed lock files ..."
+        
     - name: Install the package "sshpass"
       apt:
         name: sshpass
