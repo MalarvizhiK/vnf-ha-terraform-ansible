@@ -21,6 +21,9 @@
         - /var/cache/apt/archives/lock
         - /var/lib/dpkg/lock
         - /var/lib/dpkg/lock-frontend
+        
+    - pause:
+        seconds: 30       
 
     - debug:
         msg: "Removed lock files ..."
@@ -38,6 +41,9 @@
         - /var/cache/apt/archives/lock
         - /var/lib/dpkg/lock
         - /var/lib/dpkg/lock-frontend
+        
+    - pause:
+        seconds: 30         
 
     - debug:
         msg: "Removed lock files ..."
