@@ -120,12 +120,6 @@ resource "null_resource" "ubuntu_ansible_provisioner" {
     private_key = var.private_ssh_key
   }
 
-   // copy our example script to the server
-  provisioner "file" {
-    source      = "script/update_script.sh"
-    destination = "/tmp/update_script.sh"
-  }
-
   provisioner "ansible" {
     plays {
       playbook {
