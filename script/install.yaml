@@ -88,7 +88,7 @@
         force: yes
 
     - name: Run ha_initialize_json script
-      command: python3 /tmp/vnf-ha-cloud-failover-func/ha_initialize_json_temp.py --apikey {{ apikey }} --vpcid {{ vpcid }} --vpcurl {{ vpcurl }} --zone {{ zone }} --mgmtip1 {{ mgmtip1 }} --mgmtip2 {{ mgmtip2 }} --extip1 {{ extip1 }} --extip2 {{ extip2 }}
+      command: python3 /tmp/vnf-ha-cloud-failover-func/ha_initialize_json.py --apikey {{ apikey }} --vpcid {{ vpcid }} --vpcurl {{ vpcurl }} --zone {{ zone }} --mgmtip1 {{ mgmtip1 }} --mgmtip2 {{ mgmtip2 }} --extip1 {{ extip1 }} --extip2 {{ extip2 }}
       register: cmd_output
 
     - debug:
@@ -145,7 +145,7 @@
         msg: "Updating tgactive script ..."
 
     - name: copy update_script.sh to mgmt node
-      command: sshpass -p {{ item.hapwd }} scp -o StrictHostKeyChecking=no /tmp/update_script.sh root@{{ item.mgmtip }}:/config/failover/
+      command: sshpass -p {{ item.hapwd }} scp -o StrictHostKeyChecking=no /tmp/vnf-ha-cloud-failover-func/update_script.sh root@{{ item.mgmtip }}:/config/failover/
       with_items:
         - { hapwd: "{{ ha1pwd }}", mgmtip: "{{ mgmtip1 }}" }
         - { hapwd: "{{ ha2pwd }}", mgmtip: "{{ mgmtip2 }}" }
