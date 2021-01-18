@@ -23,7 +23,7 @@
         - /var/lib/dpkg/lock-frontend
         
     - pause:
-        seconds: 30       
+        seconds: 60       
 
     - debug:
         msg: "Removed lock files ..."
@@ -43,7 +43,7 @@
         - /var/lib/dpkg/lock-frontend
         
     - pause:
-        seconds: 30         
+        seconds: 60         
 
     - debug:
         msg: "Removed lock files ..."
