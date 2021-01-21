@@ -2,9 +2,9 @@ data "ibm_is_region" "region" {
   name = var.region
 }
 
-data "ibm_is_zone" "zone" {
-  name   = "us-south-1"
-  region = data.ibm_is_region.region.name
+# create VSI in the subnet of HA pair
+data "ibm_is_subnet" "vnf_subnet"{
+   identifier = "${var.failover_function_subnet_id}"
 }
 
 # lookup SSH public keys by name
@@ -28,14 +28,11 @@ provider "ibm" {
 ##############################################################################
 # Read/validate Resource Group
 ##############################################################################
-data "ibm_resource_group" "rg" {
-  name = var.resource_group
-}
 
 resource "ibm_is_security_group" "ubuntu_vsi_sg" {
   name           = "ubuntu-vsi-sg"
-  vpc            = var.vpc_id
-  resource_group = data.ibm_resource_group.rg.id
+  vpc            = data.ibm_is_subnet.vnf_subnet.vpc
+  resource_group = data.ibm_is_subnet.vnf_subnet.resource_group
 }
 
 //security group rule to allow ssh
@@ -85,7 +82,7 @@ resource "ibm_is_instance" "ubuntu_vsi" {
   name           = "ubuntu-ha-vsi"
   image          = data.ibm_is_image.custom_image.id
   profile        = "bx2-2x8"
-  resource_group = data.ibm_resource_group.rg.id
+  resource_group = data.ibm_is_subnet.vnf_subnet.resource_group
 
   primary_network_interface {
     subnet          = var.failover_function_subnet_id
@@ -93,8 +90,8 @@ resource "ibm_is_instance" "ubuntu_vsi" {
   }
 
   keys = [data.ibm_is_ssh_key.ssh_key.id]
-  vpc  = var.vpc_id
-  zone = var.zone
+  vpc  = data.ibm_is_subnet.vnf_subnet.vpc
+  zone = data.ibm_is_subnet.vnf_subnet.zone
 }
 
 //floating ip for above VSI
@@ -157,7 +154,7 @@ EOF
        extra_vars = {
         vpcid = var.vpc_id
         vpcurl = var.rias_api_url
-        zone = var.zone
+        zone = data.ibm_is_subnet.vnf_subnet.zone
         apikey = var.apikey
         mgmtip1 = var.mgmt_ip1
         extip1 = var.ext_ip1
