@@ -152,7 +152,7 @@ EOF
       }
       verbose = true
        extra_vars = {
-        vpcid = var.vpc_id
+        vpcid = data.ibm_is_subnet.vnf_subnet.vpc
         vpcurl = var.rias_api_url
         zone = data.ibm_is_subnet.vnf_subnet.zone
         apikey = var.apikey
