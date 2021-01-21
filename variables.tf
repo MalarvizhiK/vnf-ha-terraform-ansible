@@ -3,79 +3,59 @@ variable "TF_VERSION" {
  description = "terraform engine version to be used in schematics"
 }
 
-variable "region" {
-  default     = "us-south"
-  description = "The VPC Region that you want your VPC, networks and the F5 virtual server to be provisioned in. To list available regions, run `ibmcloud is regions`."
-}
-
 variable "generation" {
   default     = 2
   description = "The VPC Generation to target. Valid values are 2 or 1."
 }
 
-variable "zone" {
-  default     = "us-south-1"
-  description = "The zone to use. If unspecified, the us-south-1 is used."
-}
-
-variable "resource_group" {
-  default     = "Default"
-  description = "The resource group to use. If unspecified, the account's default resource group is used."
-}
-
-variable "vpc_id" {
-  default     = ""
-  description = "The vpc id to use." 
-}
-
 variable "rias_api_url" {
   default     = "https://us-south.iaas.cloud.ibm.com"
-  description = "The public RIAS endpoint url of VPC."
+  description = "The public RIAS endpoint url of VPC. This is used by vpc sdk."
 }
 
 variable "apikey" {
   default     = ""
-  description = "The apikey of IBM Cloud account."
+  description = "The apikey of IBM Cloud account. This is used by vpc sdk."
 }
 
 variable "ssh_key" {
   default     = ""
-  description = "The ssh key to use. If unspecified, 'my-ssh-key' is used."
+  description = "The public ssh key to use. The ssh key is added to VSI."
 }
 
 variable "private_ssh_key" {
   default     = "--BEGIN--"
-  description = "The private ssh key to use."
+  description = "The private ssh key to configure VSI. The private ssh key should be of the public ssh key."
 }
 
 variable "failover_function_subnet_id" {
   default     = ""
-  description = "subnet1 ipv4 cidr block."
+  description = "The HA pair subnet id. VSI is created using the same subnet id."
 }
 
 variable "mgmt_ip1" {
   default     = ""
-  description = "The management IP 1 of VNF."
+  description = "The management IP 1 of HA pair."
 }
 
 variable "ext_ip1" {
   default     = ""
-  description = "The external IP 1 of VNF."
+  description = "The external IP 1 of HA pair."
 }
 
 variable "mgmt_ip2" {
   default     = ""
-  description = "The management IP 2 of VNF."
+  description = "The management IP 2 of HA pair."
 }
 
 variable "ext_ip2" {
   default     = ""
-  description = "The external IP 2 of VNF."
+  description = "The external IP 2 of HA pair."
 }
 
 variable "f5_mgmt_ipv4_cidr_block" {
   default     = ""
-  description = "F5 Management subnet ipv4 cidr block."
+  description = "F5 Management subnet ipv4 cidr block. Only this cidr block is allowed to access fail over function."
 }
 
 variable "ha_password1" {
