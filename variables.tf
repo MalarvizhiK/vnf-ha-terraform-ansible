@@ -8,6 +8,11 @@ variable "generation" {
   description = "The VPC Generation to target. Valid values are 2 or 1."
 }
 
+variable "region" {
+  default     = "us-south"
+  description = "The VPC Region that you want your VSI to be provisioned in. To list available regions, run `ibmcloud is regions`."
+}
+
 variable "rias_api_url" {
   default     = "https://us-south.iaas.cloud.ibm.com"
   description = "The public RIAS endpoint url of VPC. This is used by vpc sdk."
