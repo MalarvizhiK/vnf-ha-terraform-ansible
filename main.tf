@@ -114,8 +114,7 @@ resource "null_resource" "ubuntu_ansible_provisioner" {
   connection {
     host = ibm_is_floating_ip.ubuntu_vsi_fip.address
     user = "root"  
-    private_key = <<EOF
-EOF 
+    private_key = var.private_ssh_key
   }
 
   provisioner "ansible" {
