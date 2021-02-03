@@ -35,7 +35,7 @@ variable "private_ssh_key" {
 
 variable "failover_function_subnet_id" {
   default     = ""
-  description = "The HA pair subnet id. VSI is created using the same subnet id."
+  description = "The ubuntu VSI subnet id."
 }
 
 variable "mgmt_ip1" {
