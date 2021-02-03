@@ -58,9 +58,9 @@ variable "ext_ip2" {
   description = "The external IP 2 of HA pair."
 }
 
-variable "f5_mgmt_ipv4_cidr_block" {
+variable "vnf_mgmt_ipv4_cidr_block" {
   default     = ""
-  description = "F5 Management subnet ipv4 cidr block. Only this cidr block is allowed to access fail over function."
+  description = "VNF Management subnet ipv4 cidr block. Only this cidr block is allowed to access fail over function."
 }
 
 variable "ha_password1" {
